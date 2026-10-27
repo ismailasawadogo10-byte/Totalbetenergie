@@ -1,4 +1,7 @@
+import bcrypt from "bcryptjs";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import prisma from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 
 export default async function LoginPage() {
@@ -51,8 +54,7 @@ async function loginAction(formData: FormData) {
   const match = await bcrypt.compare(password, user.passwordHash);
   if (!match) redirect("/login");
 
-  const cookieStore = cookies();
-  cookieStore.set("session_user_id", user.id, {
+  cookies().set("session_user_id", user.id, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
