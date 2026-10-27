@@ -31,30 +31,30 @@ enum InvestmentStatus {
 }
 
 model User {
-  id            String     @id @default(cuid())
-  name          String
-  email         String     @unique
-  passwordHash  String
-  phone         String?
-  country       String?
-  balance       Int        @default(0)
-  totalInvested Int        @default(0)
-  role          Role       @default(USER)
-  referredBy    String?
-  referralCode  String     @unique @default(cuid())
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  phone        String?
+  country      String?
+  balance      Int      @default(0)
+  totalInvested Int     @default(0)
+  role         Role     @default(USER)
+  referredBy   String?
+  referralCode String   @unique @default(cuid())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  deposits      DepositRequest[]
-  withdrawals   WithdrawalRequest[]
-  investments   Investment[]
+  deposits     DepositRequest[]
+  withdrawals  WithdrawalRequest[]
+  investments Investment[]
   notifications Notification[]
 }
 
 model AppSetting {
-  id    String @id @default(cuid())
-  key   String @unique
-  value String
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -76,50 +76,53 @@ model InvestmentProduct {
 }
 
 model Investment {
-  id            String            @id @default(cuid())
-  userId        String
-  productId     String
-  amount        Int
-  dailyReturn   Int
-  totalReturn   Int
-  durationDays  Int
-  investedAt    DateTime          @default(now())
-  nextPayoutAt  DateTime
-  lastPayoutAt  DateTime?
-  status        InvestmentStatus  @default(ACTIVE)
-  totalPaid     Int               @default(0)
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
-  user          User              @relation(fields: [userId], references: [id])
-  product       InvestmentProduct @relation(fields: [productId], references: [id])
+  id           String            @id @default(cuid())
+  userId       String
+  productId    String
+  amount       Int
+  dailyReturn  Int
+  totalReturn  Int
+  durationDays Int
+  investedAt   DateTime          @default(now())
+  nextPayoutAt DateTime
+  lastPayoutAt DateTime?
+  status       InvestmentStatus  @default(ACTIVE)
+  totalPaid    Int               @default(0)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  user    User               @relation(fields: [userId], references: [id])
+  product InvestmentProduct  @relation(fields: [productId], references: [id])
 }
 
 model DepositRequest {
-  id          String        @id @default(cuid())
-  userId      String
-  amount      Int
-  network     String
-  phone       String
-  country     String
-  proofUrl    String?
-  status      DepositStatus @default(PENDING)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  user        User          @relation(fields: [userId], references: [id])
+  id        String        @id @default(cuid())
+  userId    String
+  amount    Int
+  network   String
+  phone     String
+  country   String
+  proofUrl  String?
+  status    DepositStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  user      User          @relation(fields: [userId], references: [id])
 }
 
 model WithdrawalRequest {
-  id          String            @id @default(cuid())
-  userId      String
-  amount      Int
-  network     String
-  phone       String
-  country     String
-  fee         Int              @default(0)
-  status      WithdrawalStatus @default(PENDING)
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-  user        User             @relation(fields: [userId], references: [id])
+  id        String            @id @default(cuid())
+  userId    String
+  amount    Int
+  network   String
+  phone     String
+  country   String
+  fee       Int               @default(0)
+  status    WithdrawalStatus  @default(PENDING)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  user      User              @relation(fields: [userId], references: [id])
 }
 
 model Notification {
@@ -129,5 +132,6 @@ model Notification {
   message   String
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
+
   user      User     @relation(fields: [userId], references: [id])
 }

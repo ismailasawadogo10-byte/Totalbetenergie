@@ -9,16 +9,10 @@ export async function getCurrentUser() {
   return prisma.user.findUnique({
     where: { id: sessionId },
     include: {
-      investments: {
-        include: {
-          product: true,
-        },
-      },
+      investments: { include: { product: true } },
       deposits: true,
       withdrawals: true,
-      notifications: {
-        orderBy: { createdAt: "desc" },
-      },
+      notifications: { orderBy: { createdAt: "desc" } },
     },
   });
 }
