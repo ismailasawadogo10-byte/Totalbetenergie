@@ -8,7 +8,22 @@ export const allowedCountries = [
   "Côte d'Ivoire",
   "Burkina Faso",
   "Niger",
-];
+] as const;
+
+type AppSettings = {
+  paymentLink: string;
+  telegramLink: string;
+  telegramSupportLink: string;
+  referralRate1: number;
+  referralRate2: number;
+  referralRate3: number;
+  withdrawalFeePercent: number;
+  minWithdrawal: number;
+  allowedCountries: string[];
+  logoText: string;
+  popupTitle: string;
+  popupText: string[];
+};
 
 export async function getCurrentUser() {
   const sessionId = cookies().get("session_user_id")?.value;
@@ -142,12 +157,23 @@ export async function ensureSeedData() {
   });
 }
 
-export async function getSettings() {
+export async function getSettings(): Promise<AppSettings> {
   await ensureSeedData();
 
   const settings = await prisma.appSetting.findMany();
   const map: Record<string, string> = {};
   for (const item of settings) map[item.key] = item.value;
+
+  const parsedCountries = JSON.parse(map.allowedCountries ?? JSON.stringify(allowedCountries)) as string[];
+  const parsedPopupText = JSON.parse(
+    map.popupText ??
+      JSON.stringify([
+        "Inscrivez-vous maintenant et recevez 500 FCFA gratuitement.",
+        "Invitez vos amis à investir et gagnez 25% / 3% / 2% sur 3 niveaux.",
+        "Les rendements sont versés automatiquement chaque jour pendant 180 jours.",
+        "Investissez dès 2 000 FCFA et commencez à gagner dès le lendemain.",
+      ])
+  ) as string[];
 
   return {
     paymentLink: map.paymentLink ?? "https://payliv.shop/pay/plv_rkermm7f-",
@@ -158,18 +184,10 @@ export async function getSettings() {
     referralRate3: Number(map.referralRate3 ?? "2"),
     withdrawalFeePercent: Number(map.withdrawalFeePercent ?? "15"),
     minWithdrawal: Number(map.minWithdrawal ?? "800"),
-    allowedCountries: JSON.parse(map.allowedCountries ?? JSON.stringify(allowedCountries)),
+    allowedCountries: parsedCountries,
     logoText: map.logoText ?? "Total Énergie",
     popupTitle: map.infoPopupTitle ?? "INFORMATION",
-    popupText: JSON.parse(
-      map.popupText ??
-        JSON.stringify([
-          "Inscrivez-vous maintenant et recevez 500 FCFA gratuitement.",
-          "Invitez vos amis à investir et gagnez 25% / 3% / 2% sur 3 niveaux.",
-          "Les rendements sont versés automatiquement chaque jour pendant 180 jours.",
-          "Investissez dès 2 000 FCFA et commencez à gagner dès le lendemain.",
-        ])
-    ),
+    popupText: parsedPopupText,
   };
 }
 
