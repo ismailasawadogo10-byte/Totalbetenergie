@@ -21,14 +21,7 @@ export default async function RegisterPage() {
             Nom complet
             <input className="input" name="name" required />
           </label>
-          <label className="label">
-            Email
-            <input className="input" name="email" type="email" required />
-          </label>
-          <label className="label">
-            Numéro de téléphone
-            <input className="input" name="phone" placeholder="Ex : 97000001" required />
-          </label>
+
           <label className="label">
             Pays
             <select className="select" name="country" required>
@@ -38,9 +31,20 @@ export default async function RegisterPage() {
               ))}
             </select>
           </label>
+
+          <label className="label">
+            Numéro de téléphone
+            <input className="input" name="phone" placeholder="Ex : 97000001" required />
+          </label>
+
           <label className="label">
             Mot de passe
             <input className="input" name="password" type="password" minLength={6} required />
+          </label>
+
+          <label className="label">
+            Code de parrainage
+            <input className="input" name="referralCode" placeholder="Optionnel" />
           </label>
 
           <button className="btn btn-primary" type="submit">S’inscrire</button>
@@ -58,29 +62,38 @@ async function registerAction(formData: FormData) {
   "use server";
 
   const name = String(formData.get("name") ?? "").trim();
-  const email = String(formData.get("email") ?? "").trim();
-  const phone = String(formData.get("phone") ?? "").trim();
   const country = String(formData.get("country") ?? "").trim();
+  const phone = String(formData.get("phone") ?? "").trim();
   const password = String(formData.get("password") ?? "");
+  const referralCode = String(formData.get("referralCode") ?? "").trim();
 
-  if (!name || !email || !phone || !country || !password) redirect("/register");
-  if (!allowedCountries.includes(country)) redirect("/register");
+  if (!name || !country || !phone || !password) redirect("/register");
 
-  const existing = await prisma.user.findFirst({
-    where: { email },
+  const validCountry = allowedCountries.some((item) => item === country);
+  if (!validCountry) redirect("/register");
+
+  const existingUser = await prisma.user.findFirst({
+    where: {
+      country,
+      phone,
+    },
   });
-  if (existing) redirect("/register");
+
+  if (existingUser) redirect("/register");
 
   const passwordHash = await bcrypt.hash(password, 10);
+  const generatedEmail = `${phone}@${country.replace(/\s+/g, "").toLowerCase()}.local`;
+
   const user = await prisma.user.create({
     data: {
       name,
-      email,
+      email: generatedEmail,
       phone,
       country,
       passwordHash,
       balance: 500,
       role: "USER",
+      referredBy: referralCode || null,
     },
   });
 
